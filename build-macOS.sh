@@ -26,9 +26,6 @@ fi
 rm -rf "./build/macOS"
 mkdir -p "./build/macOS"
 
-# Create executables dir to prevent installing them into the system
-mkdir -p "./executables"
-
 # Make sure wa have a clean cpython
 git submodule update --init --recursive
 cd './cpython'
@@ -49,7 +46,7 @@ sed -i '' -E \
     --with-openssl=$(brew --prefix openssl) \
     --enable-framework="${SCRIPT_DIR}/build/macOS" \
     --with-framework-name="${FRAMEWORK_NAME}" \
-    --prefix="${SCRIPT_DIR}/executables"
+    --prefix="${SCRIPT_DIR}/build/dummy"
 
 # Build the framework
 make
@@ -65,5 +62,7 @@ cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
 sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
     "./build/macOS/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
-# Remove executables dir
-rm -rf "./executables"
+# "Verify"
+test -x "./build/macOS/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
+    && printf 'Build successfull!\n\n' \
+    || printf 'Something went wrong.\n\n'
