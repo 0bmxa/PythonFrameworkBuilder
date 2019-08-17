@@ -22,9 +22,9 @@ else
     brew install openssl
 fi
 
-# Create framework output dir
-rm -rf "./build/macOS"
+# Make sure the framework output dir exists, but the framework not
 mkdir -p "./build/macOS"
+rm -rf "./build/macOS/${FRAMEWORK_NAME}.framework"
 
 # Make sure wa have a clean cpython
 git submodule update --init --recursive
@@ -52,6 +52,10 @@ sed -i '' -E \
 make
 make frameworkinstallframework
 
+# Clean after us
+git clean -fdxq
+git reset --hard HEAD
+
 # Copy module map
 cd '..'
 mkdir "./build/macOS/${FRAMEWORK_NAME}.framework/Modules"
@@ -59,8 +63,8 @@ cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
     "./build/macOS/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # Replace framework name in module map
-sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
-    "./build/macOS/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+# sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
+#     "./build/macOS/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # "Verify"
 test -x "./build/macOS/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
