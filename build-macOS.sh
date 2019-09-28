@@ -67,6 +67,14 @@ cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
 #     "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # "Verify"
-test -x "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
-    && printf 'Build successfull!\n\n' \
-    || printf 'Something went wrong.\n\n'
+eighty_char_line=$(printf "%80s" | tr ' ' =)
+printf "\n\n$eighty_char_line\n"
+if [[ -x "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" ]]
+then
+    printf 'Build successfull!\n\n'
+    printf 'Find your product in:\n'
+    printf "  ./build/${PLATFORM}/${FRAMEWORK_NAME}.framework\n"
+else
+    printf 'Something went wrong.\n'
+fi
+printf "$eighty_char_line\n\n"
