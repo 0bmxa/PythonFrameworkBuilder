@@ -2,7 +2,6 @@
 
 set -eo pipefail
 
-# Warning: Changing this does (probably) not work yet!
 PYTHON_VERSION='3.7'
 
 
