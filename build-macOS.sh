@@ -12,6 +12,7 @@ PYTHON_VERSION='3.7'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FRAMEWORK_NAME='Python'$(echo $PYTHON_VERSION | sed 's/\./_/g')
+PLATFORM="macOS"
 
 # Make sure openssl is installed
 if brew list openssl 2>/dev/null >/dev/null; then
@@ -22,8 +23,8 @@ else
 fi
 
 # Make sure the framework output dir exists, but the framework not
-mkdir -p "./build/macOS"
-rm -rf "./build/macOS/${FRAMEWORK_NAME}.framework"
+mkdir -p "./build/${PLATFORM}"
+rm -rf "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework"
 
 # Make sure wa have a clean cpython
 git submodule update --init --recursive
@@ -43,7 +44,7 @@ sed -i '' -E \
     --with-pydebug \
     --without-ensurepip \
     --with-openssl=$(brew --prefix openssl) \
-    --enable-framework="${SCRIPT_DIR}/build/macOS" \
+    --enable-framework="${SCRIPT_DIR}/build/${PLATFORM}" \
     --with-framework-name="${FRAMEWORK_NAME}" \
     --prefix="${SCRIPT_DIR}/build/dummy"
 
@@ -57,15 +58,15 @@ git reset --hard HEAD
 
 # Copy module map
 cd '..'
-mkdir "./build/macOS/${FRAMEWORK_NAME}.framework/Modules"
+mkdir "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules"
 cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
-    "./build/macOS/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+    "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # Replace framework name in module map
 # sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
-#     "./build/macOS/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+#     "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # "Verify"
-test -x "./build/macOS/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
+test -x "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
     && printf 'Build successfull!\n\n' \
     || printf 'Something went wrong.\n\n'
