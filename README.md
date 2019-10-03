@@ -2,7 +2,9 @@
 
 ## What is this
 
-This builds (or tries to) cpython as a Framework for Apple platforms.
+This is a meta package which builds (or tries to build)
+[`CPython`](https://github.com/python/cpython) as a Framework for Apple
+platforms.
 
 ## How to use
 
