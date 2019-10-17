@@ -1,0 +1,14 @@
+3134,3135c3134,3135
+< 		FRAMEWORKINSTALLLAST="frameworkinstallmaclib frameworkinstallapps frameworkinstallunixtools"
+< 		FRAMEWORKALTINSTALLLAST="frameworkinstallmaclib frameworkinstallapps frameworkaltinstallunixtools"
+---
+> 		FRAMEWORKINSTALLLAST="frameworkinstallframework"
+> 		FRAMEWORKALTINSTALLLAST="frameworkinstallframework"
+3258a3259,3261
+> 	*-*-ios*)
+> 		ac_sys_system=Darwin
+> 		;;
+3302a3306,3308
+> 	*-*-ios*)
+> 		_host_cpu=arm
+> 		;;
