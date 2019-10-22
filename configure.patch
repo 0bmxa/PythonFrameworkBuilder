@@ -1,9 +1,11 @@
-3134,3135c3134,3135
+3134,3136c3134,3136
 < 		FRAMEWORKINSTALLLAST="frameworkinstallmaclib frameworkinstallapps frameworkinstallunixtools"
 < 		FRAMEWORKALTINSTALLLAST="frameworkinstallmaclib frameworkinstallapps frameworkaltinstallunixtools"
+< 		FRAMEWORKPYTHONW="frameworkpythonw"
 ---
 > 		FRAMEWORKINSTALLLAST="frameworkinstallframework"
 > 		FRAMEWORKALTINSTALLLAST="frameworkinstallframework"
+> 		FRAMEWORKPYTHONW=
 3258a3259,3261
 > 	*-*-ios*)
 > 		ac_sys_system=Darwin

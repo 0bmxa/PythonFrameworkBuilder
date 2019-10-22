@@ -81,6 +81,8 @@ rm ./configure.ac
     --with-pydebug \
     --without-ensurepip \
     --with-openssl=$(brew --prefix openssl) \
+    --with-system-ffi \
+    --with-system-libmpdec \
     --enable-framework="${SCRIPT_DIR}/build/${PLATFORM}" \
     --with-framework-name="${FRAMEWORK_NAME}" \
     --prefix="${SCRIPT_DIR}/build/dummy" \
@@ -89,8 +91,18 @@ rm ./configure.ac
     # ac_cv_func_
     # --without-doc-strings \
 
-# FIXME: No getentropy on iOS
-sed -i '' -E "s/.*HAVE_GETENTROPY.*/\/\* #undef HAVE_GETENTROPY \*\//g" ./pyconfig.h
+# FIXME: Force disable stuff on iOS
+sed -i '' -E "s/.*HAVE_(GETENTROPY|SENDFILE|CLOCK_SETTIME).*/\/\* #undef HAVE_\1 \*\//g" ./pyconfig.h
+sed -i '' -E "s/.*WITH_NEXT_FRAMEWORK.*/\/\* #undef WITH_NEXT_FRAMEWORK \*\//g" ./pyconfig.h # TODO: can be disabled via configure.patch
+sed -i '' -E "s/.*\#define HAVE_SYSTEM.*/\/\* #undef HAVE_SYSTEM \*\//g" ./Modules/posixmodule.c
+sed -i '' -E "s/disabled_module_list = \[\]/disabled_module_list = \[\"_ctypes\"\, \"_decimal\"]/g" ./setup.py
+
+sed -i '' -E "s/bininstall: altbininstall/bininstall:/g" ./Makefile
+sed -i '' -E "s/altbininstall libinstall/libinstall/g" ./Makefile
+
+# for i in "HAVE_GETENTROPY" "WITH_NEXT_FRAMEWORK" "HAVE_SYSTEM"; do
+#     sed -i '' -E "s/.*(${i}).*/\/\* #undef \1 \*\//g" ./pyconfig.h
+# done
 
 # CC
 # CFLAGS
@@ -103,8 +115,8 @@ sed -i '' -E "s/.*HAVE_GETENTROPY.*/\/\* #undef HAVE_GETENTROPY \*\//g" ./pyconf
 # PKG_CONFIG_LIBDIR
 
 # Build the framework
-make
-make frameworkinstallframework
+# make --debug=i
+make --debug=i frameworkinstallframework
 
 exit 0
 
