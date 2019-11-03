@@ -15,16 +15,20 @@ FRAMEWORK_NAME='Python'$(echo $PYTHON_VERSION | sed 's/\./_/g')
 PLATFORM="iOS"
 
 # Make sure openssl is installed
-if brew list openssl 2>/dev/null >/dev/null; then
-    printf 'OpenSSL via Homebrew found.\n'
-else
-    printf 'OpenSSL via Homebrew is required. Installing OpenSSL...\n'
-    brew install openssl
-fi
+# if brew list openssl 2>/dev/null >/dev/null; then
+#     printf 'OpenSSL via Homebrew found.\n'
+# else
+#     printf 'OpenSSL via Homebrew is required. Installing OpenSSL...\n'
+#     brew install openssl
+# fi
+# OPENSSL_PATH="$(brew --prefix openssl)"
+OPENSSL_PATH=${SCRIPT_DIR}/dist
+
+DIST_DIR="${SCRIPT_DIR}/dist"
 
 # Make sure the framework output dir exists, but the framework not
-mkdir -p "./build/${PLATFORM}"
-rm -rf "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework"
+mkdir -p "${DIST_DIR}/${PLATFORM}"
+rm -rf "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework"
 
 # Make sure wa have a clean cpython
 git submodule update --init --recursive
@@ -64,6 +68,7 @@ TARGET_HOST_IOS='aarch64-apple-ios'
 DARWIN_VERSION="$(uname -r)"
 BUILD_HOST="x86_64-apple-darwin${DARWIN_VERSION}"
 
+
 # temp
 rm ./configure.ac
 
@@ -80,10 +85,10 @@ rm ./configure.ac
     --enable-ipv6 \
     --with-pydebug \
     --without-ensurepip \
-    --with-openssl=$(brew --prefix openssl) \
+    --with-openssl="$OPENSSL_PATH" \
     --with-system-ffi \
     --with-system-libmpdec \
-    --enable-framework="${SCRIPT_DIR}/build/${PLATFORM}" \
+    --enable-framework="${DIST_DIR}/${PLATFORM}" \
     --with-framework-name="${FRAMEWORK_NAME}" \
     --prefix="${SCRIPT_DIR}/build/dummy" \
     ac_cv_file__dev_ptmx=no \
@@ -98,7 +103,10 @@ sed -i '' -E "s/.*\#define HAVE_SYSTEM.*/\/\* #undef HAVE_SYSTEM \*\//g" ./Modul
 sed -i '' -E "s/disabled_module_list = \[\]/disabled_module_list = \[\"_ctypes\"\, \"_decimal\"]/g" ./setup.py
 
 sed -i '' -E "s/bininstall: altbininstall/bininstall:/g" ./Makefile
-sed -i '' -E "s/altbininstall libinstall/libinstall/g" ./Makefile
+sed -i '' -E "s/altbininstall libinstall inclinstall libainstall/libinstall inclinstall/g" ./Makefile
+
+# this does probably not work
+sed -i '' -E "s/^frameworkinstallframework:.*/frameworkinstallframework: frameworkinstallstructure install/g" ./Makefile
 
 # for i in "HAVE_GETENTROPY" "WITH_NEXT_FRAMEWORK" "HAVE_SYSTEM"; do
 #     sed -i '' -E "s/.*(${i}).*/\/\* #undef \1 \*\//g" ./pyconfig.h
@@ -116,7 +124,7 @@ sed -i '' -E "s/altbininstall libinstall/libinstall/g" ./Makefile
 
 # Build the framework
 # make --debug=i
-make --debug=i frameworkinstallframework
+make --debug frameworkinstallframework
 
 exit 0
 
@@ -126,15 +134,15 @@ git reset --hard HEAD
 
 # Copy module map
 cd '..'
-mkdir "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules"
+mkdir "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules"
 cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
-    "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+    "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # Replace framework name in module map
 # sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
-#     "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+#     "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # "Verify"
-test -x "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
+test -x "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
     && printf 'Build successfull!\n\n' \
     || printf 'Something went wrong.\n\n'

@@ -1,3 +1,6 @@
 [submodule "cpython"]
 	path = cpython
 	url = git@github.com:python/cpython
+[submodule "openssl"]
+	path = openssl
+	url = git@github.com:openssl/openssl.git
