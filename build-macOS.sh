@@ -61,6 +61,11 @@ cd '..'
 mkdir "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules"
 cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
     "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+    
+# Fix identification name
+install_name_tool \
+    -id "@executable_path/../Frameworks/Python3_7.framework/Python3_7" \
+    "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Versions/3.7/Python3_7"
 
 # Replace framework name in module map
 # sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
