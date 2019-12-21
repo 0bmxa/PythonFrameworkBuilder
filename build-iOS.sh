@@ -100,13 +100,30 @@ rm ./configure.ac
 sed -i '' -E "s/.*HAVE_(GETENTROPY|SENDFILE|CLOCK_SETTIME).*/\/\* #undef HAVE_\1 \*\//g" ./pyconfig.h
 sed -i '' -E "s/.*WITH_NEXT_FRAMEWORK.*/\/\* #undef WITH_NEXT_FRAMEWORK \*\//g" ./pyconfig.h # TODO: can be disabled via configure.patch
 sed -i '' -E "s/.*\#define HAVE_SYSTEM.*/\/\* #undef HAVE_SYSTEM \*\//g" ./Modules/posixmodule.c
-sed -i '' -E "s/disabled_module_list = \[\]/disabled_module_list = \[\"_ctypes\"\, \"_decimal\"]/g" ./setup.py
+sed -i '' -E "s/disabled_module_list = \[\]/disabled_module_list = \[\"_ctypes\"\, \"_decimal\", \"_tkinter\"]/g" ./setup.py
 
-sed -i '' -E "s/bininstall: altbininstall/bininstall:/g" ./Makefile
-sed -i '' -E "s/altbininstall libinstall inclinstall libainstall/libinstall inclinstall/g" ./Makefile
+# _ctypes_test
+# _curses
+# _curses_panel
+# _tkinter
 
-# this does probably not work
-sed -i '' -E "s/^frameworkinstallframework:.*/frameworkinstallframework: frameworkinstallstructure install/g" ./Makefile
+#
+# Is this all really necessary??
+#
+
+# # Remove `altbininstall` from `bininstall`
+# sed -i '' -E "s/bininstall: altbininstall/bininstall:/g" ./Makefile
+
+# # Remove `bininstall` and `maninstall` from `install`
+# sed -i '' -E 's/bininstall maninstall//g' ./Makefile
+
+# # Remove `altbininstall` and `libainstall` from `commoninstall`
+# sed -i '' -E "s/altbininstall libinstall inclinstall libainstall/libinstall inclinstall/g" ./Makefile
+
+# # Remove `frameworkinstallmaclib` from `frameworkinstallframework`
+# sed -i '' -E "s/install frameworkinstallmaclib/install/g" ./Makefile
+
+# install_name_tool -id @executable_path/Frameworks/Python3_7.framework/Python3_7 "prebuilt/iOS/Python3_7.framework/Python3_7"
 
 # for i in "HAVE_GETENTROPY" "WITH_NEXT_FRAMEWORK" "HAVE_SYSTEM"; do
 #     sed -i '' -E "s/.*(${i}).*/\/\* #undef \1 \*\//g" ./pyconfig.h
@@ -124,13 +141,12 @@ sed -i '' -E "s/^frameworkinstallframework:.*/frameworkinstallframework: framewo
 
 # Build the framework
 # make --debug=i
-make --debug frameworkinstallframework
+# make --debug frameworkinstallframework
+make frameworkinstallstructure inclinstall
 
-exit 0
-
-# Clean after us
-git clean -fdxq
-git reset --hard HEAD
+# # Clean after us
+# git clean -fdxq
+# git reset --hard HEAD
 
 # Copy module map
 cd '..'
