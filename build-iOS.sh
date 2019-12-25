@@ -123,8 +123,6 @@ sed -i '' -E "s/disabled_module_list = \[\]/disabled_module_list = \[\"_ctypes\"
 # # Remove `frameworkinstallmaclib` from `frameworkinstallframework`
 # sed -i '' -E "s/install frameworkinstallmaclib/install/g" ./Makefile
 
-# install_name_tool -id @executable_path/Frameworks/Python3_7.framework/Python3_7 "prebuilt/iOS/Python3_7.framework/Python3_7"
-
 # for i in "HAVE_GETENTROPY" "WITH_NEXT_FRAMEWORK" "HAVE_SYSTEM"; do
 #     sed -i '' -E "s/.*(${i}).*/\/\* #undef \1 \*\//g" ./pyconfig.h
 # done
@@ -154,11 +152,23 @@ mkdir "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules"
 cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
     "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
+# install_name_tool \
+#     -id @executable_path/Frameworks/Python3_7.framework/Python3_7 \
+#     "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Versions/3.7/Python3_7"
+
 # Replace framework name in module map
 # sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
 #     "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # "Verify"
-test -x "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
-    && printf 'Build successfull!\n\n' \
-    || printf 'Something went wrong.\n\n'
+eighty_char_line=$(printf "%80s" | tr ' ' =)
+printf "\n\n$eighty_char_line\n"
+if [[ -x "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" ]]
+then
+    printf 'Build successfull!\n\n'
+    printf 'Find your product in:\n'
+    printf "  ${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework\n"
+else
+    printf 'Something went wrong.\n'
+fi
+printf "$eighty_char_line\n\n"

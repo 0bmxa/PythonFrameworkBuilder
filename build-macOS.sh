@@ -21,10 +21,13 @@ else
     printf 'OpenSSL via Homebrew is required. Installing OpenSSL...\n'
     brew install openssl
 fi
+OPENSSL_PATH="$(brew --prefix openssl)"
+
+DIST_DIR="${SCRIPT_DIR}/dist"
 
 # Make sure the framework output dir exists, but the framework not
-mkdir -p "./build/${PLATFORM}"
-rm -rf "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework"
+mkdir -p "${DIST_DIR}/${PLATFORM}"
+rm -rf "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework"
 
 # Make sure wa have a clean cpython
 git submodule update --init --recursive
@@ -43,7 +46,7 @@ sed -i '' -E \
     --enable-ipv6 \
     --with-pydebug \
     --without-ensurepip \
-    --with-openssl=$(brew --prefix openssl) \
+    --with-openssl=${OPENSSL_PATH} \
     --enable-framework="${SCRIPT_DIR}/build/${PLATFORM}" \
     --with-framework-name="${FRAMEWORK_NAME}" \
     --prefix="${SCRIPT_DIR}/build/dummy"
@@ -58,27 +61,27 @@ git reset --hard HEAD
 
 # Copy module map
 cd '..'
-mkdir "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules"
+mkdir "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules"
 cp "./modulemaps/${FRAMEWORK_NAME}.modulemap" \
-    "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+    "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
     
 # Fix identification name
 install_name_tool \
     -id "@executable_path/../Frameworks/Python3_7.framework/Python3_7" \
-    "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Versions/3.7/Python3_7"
+    "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Versions/3.7/Python3_7"
 
 # Replace framework name in module map
 # sed -i '' -E "s/__FRAMEWORK_NAME__/${FRAMEWORK_NAME}/g" \
-#     "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
+#     "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/Modules/module.modulemap"
 
 # "Verify"
 eighty_char_line=$(printf "%80s" | tr ' ' =)
 printf "\n\n$eighty_char_line\n"
-if [[ -x "./build/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" ]]
+if [[ -x "${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" ]]
 then
     printf 'Build successfull!\n\n'
     printf 'Find your product in:\n'
-    printf "  ./build/${PLATFORM}/${FRAMEWORK_NAME}.framework\n"
+    printf "  ${DIST_DIR}/${PLATFORM}/${FRAMEWORK_NAME}.framework\n"
 else
     printf 'Something went wrong.\n'
 fi
